@@ -36,13 +36,25 @@ public class EmployeeEntity
 	 * @param employee incoming entity to be used for construction of instance
 	 * @param context incoming context to properly handling cyclic dependencies
 	 */
-	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
+//	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
 	public EmployeeEntity(@NonNull EmployeeDTO employee, @NonNull CycleTracking context)
 	{
 		// call required args constructor
 		this(employee.getName(), INSTANCE.map(employee.getDepartment(), context));
 		setId(department.getId());
 		log.debug("{}, context {}", this, context);
+	}
+
+	void beforeMapping(@NonNull EmployeeDTO employee)
+	{
+		log.debug("entity {}, employee {}", this, employee);
+		// set fields that can not be modified from outside
+		setId(employee.getId());
+	}
+
+	void afterMapping(@NonNull EmployeeDTO employee)
+	{
+		log.debug("entity {}, dto {}", this, employee);
 	}
 
 	private void setId(@NonNull Long id) { this.id = id; }

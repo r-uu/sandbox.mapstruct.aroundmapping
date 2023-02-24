@@ -38,12 +38,24 @@ public class DepartmentEntity
 	 * @param department incoming DTO to be used for construction of instance
 	 * @param context incoming context to properly handling cyclic dependencies
 	 */
-	@Default // necessary make sure mapstruct does not use no-args-constructor
+//	@Default // necessary make sure mapstruct does not use no-args-constructor
 	public DepartmentEntity(@NonNull DepartmentDTO department, @NonNull MapStructMapper.CycleTracking context)
 	{
 		this(department.getName());
 		setId(new Random().nextLong());
 		log.debug("{}, context {}", this, context);
+	}
+
+	void beforeMapping(@NonNull DepartmentDTO dto)
+	{
+		log.debug("entity {}, dto {}", this, dto);
+		// set fields that can not be modified from outside
+		setId(dto.getId());
+	}
+
+	void afterMapping(@NonNull DepartmentDTO dto)
+	{
+		log.debug("entity {}, dto {}", this, dto);
 	}
 
 	private void setId(@NonNull Long id) { this.id = id; }

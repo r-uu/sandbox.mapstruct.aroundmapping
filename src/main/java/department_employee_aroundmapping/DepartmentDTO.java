@@ -36,13 +36,25 @@ public class DepartmentDTO
 	 * @param department incoming entity to be used for construction of instance
 	 * @param context incoming context to properly handling cyclic dependencies
 	 */
-	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
+//	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
 	public DepartmentDTO(@NonNull DepartmentEntity department, @NonNull CycleTracking context)
 	{
 		// call required args constructor
 		this(department.getName());
 		setId(department.getId());
 		log.debug("{}, context {}", this, context);
+	}
+
+	void beforeMapping(@NonNull DepartmentEntity entity)
+	{
+		log.debug("dto {}, entity {}", this, entity);
+		// set fields that can not be modified from outside
+		setId(entity.getId());
+	}
+
+	void afterMapping(@NonNull DepartmentEntity entity)
+	{
+		log.debug("dto {}, entity {}", this, entity);
 	}
 
 	private void setId(@NonNull Long id) { this.id = id; }
