@@ -1,6 +1,5 @@
 package department_employee_aroundmapping;
 
-import static department_employee_aroundmapping.MapStructMapper.*;
 import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -11,7 +10,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,6 +28,8 @@ public class EmployeeEntity
 	@NonNull @Setter private String name;
 
 	/** mutable, but not nullable */
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	@NonNull @Setter private DepartmentEntity department;
 
 	/**
@@ -38,13 +38,13 @@ public class EmployeeEntity
 	 * @param context incoming context to properly handling cyclic dependencies
 	 */
 //	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
-	public EmployeeEntity(@NonNull EmployeeDTO employee, @NonNull CycleTracking context)
-	{
-		// call required args constructor
-		this(employee.getName(), INSTANCE.map(employee.getDepartment(), context));
-		setId(department.getId());
-		log.debug("{}, context {}", this, context);
-	}
+//	public EmployeeEntity(@NonNull EmployeeDTO employee, @NonNull CycleTracking context)
+//	{
+//		// call required args constructor
+//		this(employee.getName(), INSTANCE.map(employee.getDepartment(), context));
+//		setId(department.getId());
+//		log.debug("{}, context {}", this, context);
+//	}
 
 	void beforeMapping(@NonNull EmployeeDTO employee)
 	{

@@ -3,7 +3,9 @@ package department_employee_aroundmapping;
 import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
-import department_employee_aroundmapping.MapStructMapper.Default;
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Random;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +33,10 @@ public class DepartmentEntity
 	/** mutable */
 	@Setter private String description;
 
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private Set<EmployeeEntity> employees;
+
 	/**
 	 * let this be used by mapstruct (@Default, @ObjectFactory) and make sure to manually call required args constructor
 	 * <p>random value will be assigned to {@link #id}
@@ -40,11 +44,48 @@ public class DepartmentEntity
 	 * @param context incoming context to properly handling cyclic dependencies
 	 */
 //	@Default // necessary make sure mapstruct does not use no-args-constructor
-	public DepartmentEntity(@NonNull DepartmentDTO department, @NonNull MapStructMapper.CycleTracking context)
+//	public DepartmentEntity(@NonNull DepartmentDTO department, @NonNull MapStructMapper.CycleTracking context)
+//	{
+//		this(department.getName());
+//		setId(new Random().nextLong());
+//		log.debug("{}, context {}", this, context);
+//	}
+
+	public boolean add(@NonNull EmployeeEntity employee)
 	{
-		this(department.getName());
-		setId(new Random().nextLong());
-		log.debug("{}, context {}", this, context);
+		if (employee.getDepartment() == this)
+		{
+			if (employeesContains(employee)) return true;
+			return nonNullEmployees().add(employee);
+		}
+		else
+		{
+			// following check should never return true
+			if (employeesContains(employee))
+				log.error("employee with {} is already contained in {}", employee.getDepartment(), this);
+
+			// assign this department as department of employee and update employees
+			employee.setDepartment(this);
+			return nonNullEmployees().add(employee);
+		}
+	}
+
+	public boolean remove(@NonNull EmployeeEntity employee)
+	{
+		if (isNull(employees)) return false;
+		return employees.remove(employee);
+	}
+
+	private Set<EmployeeEntity> nonNullEmployees()
+	{
+		if (isNull(employees)) employees = new HashSet<>();
+		return employees;
+	}
+
+	private boolean employeesContains(EmployeeEntity employee)
+	{
+		if (isNull(employees)) return false;
+		return employees.contains(employee);
 	}
 
 	void beforeMapping(@NonNull DepartmentDTO department)

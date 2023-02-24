@@ -8,23 +8,32 @@ import java.lang.annotation.Target;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.BeforeMapping;
+import org.mapstruct.Context;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.TargetType;
 import org.mapstruct.factory.Mappers;
 
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Mapper
+//(
+//		collectionMappingStrategy = ADDER_PREFERRED,
+//    nullValueCheckStrategy = ALWAYS
+//)
 @Slf4j
 public abstract class MapStructMapper
 {
 	public static MapStructMapper INSTANCE = Mappers.getMapper(MapStructMapper.class);
 
-	abstract DepartmentEntity map(DepartmentDTO    department, CycleTracking context);
-	abstract DepartmentDTO    map(DepartmentEntity department, CycleTracking context);
+	abstract DepartmentEntity map(DepartmentDTO    department, @Context CycleTracking context);
+	abstract DepartmentDTO    map(DepartmentEntity department, @Context CycleTracking context);
 
-	abstract EmployeeEntity map(EmployeeDTO    employee, CycleTracking context);
-	abstract EmployeeDTO    map(EmployeeEntity employee, CycleTracking context);
+	abstract EmployeeEntity map(EmployeeDTO    employee, @Context CycleTracking context);
+	abstract EmployeeDTO    map(EmployeeEntity employee, @Context CycleTracking context);
 
 	@BeforeMapping protected void beforeMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
 	{
