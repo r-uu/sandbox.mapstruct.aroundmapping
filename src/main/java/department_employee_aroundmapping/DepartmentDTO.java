@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @NoArgsConstructor(access = PROTECTED) // generate no args constructor for jsonb, jaxb, mapstruct, ...
-//@Accessors(fluent = true)
+//@Accessors(fluent = true) // mapstruct does not seem to support fluent accessors
 @Getter
 @ToString
 @EqualsAndHashCode
@@ -39,6 +39,7 @@ public class DepartmentDTO
 	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
 	public DepartmentDTO(@NonNull DepartmentEntity department, @NonNull CycleTracking context)
 	{
+		// call required args constructor
 		this(department.getName());
 		setId(department.getId());
 		log.debug("{}, context {}", this, context);

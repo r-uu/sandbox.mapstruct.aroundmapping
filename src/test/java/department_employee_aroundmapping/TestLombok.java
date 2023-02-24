@@ -13,28 +13,36 @@ class TestLombok
 	{
 		DepartmentDTO department = new DepartmentDTO();
 
-		assertThat(department.name(), is(nullValue()));
+		assertThat(department.getId()         , is(nullValue()));
+		assertThat(department.getName()       , is(nullValue()));
+		assertThat(department.getDescription(), is(nullValue()));
 	}
 
 	@Test void emptyEmployeeDTO()
 	{
-		EmployeeDTO employeeDTO = new EmployeeDTO();
+		EmployeeDTO employee = new EmployeeDTO();
 
-		assertThat(employeeDTO.name(), is(nullValue()));
+		assertThat(employee.getId()        , is(nullValue()));
+		assertThat(employee.getName()      , is(nullValue()));
+		assertThat(employee.getDepartment(), is(nullValue()));
 	}
 
 	@Test void emptyDepartmentEntity()
 	{
-		DepartmentEntity departmentEntity = new DepartmentEntity();
+		DepartmentEntity department = new DepartmentEntity();
 
-		assertThat(departmentEntity.name(), is(nullValue()));
+		assertThat(department.getId()         , is(nullValue()));
+		assertThat(department.getName()       , is(nullValue()));
+		assertThat(department.getDescription(), is(nullValue()));
 	}
 
 	@Test void emptyEmployeeEntity()
 	{
-		EmployeeEntity employeeEntity = new EmployeeEntity();
+		EmployeeEntity employee = new EmployeeEntity();
 
-		assertThat(employeeEntity.name(), is(nullValue()));
+		assertThat(employee.getId()        , is(nullValue()));
+		assertThat(employee.getName()      , is(nullValue()));
+		assertThat(employee.getDepartment(), is(nullValue()));
 	}
 
 	@Test void invalidNameDepartmentDTO()
@@ -77,19 +85,20 @@ class TestLombok
 
 	@Test void validDepartmentDTO()
 	{
-		String name = "name";
+		String        name           = "name";
 		DepartmentDTO departmentDTO  = new DepartmentDTO(name);
 
-		assertThat(departmentDTO.name(), is(name));
+		assertThat(departmentDTO.getName()       , is(name));
+		assertThat(departmentDTO.getDescription(), is(nullValue()));
 	}
 
 	@Test void validEmployeeInDepartmentDTO()
 	{
-		String name = "name";
+		String        name       = "name";
 		DepartmentDTO department = new DepartmentDTO(name);
-		EmployeeDTO employee  = new EmployeeDTO(name, department);
+		EmployeeDTO   employee   = new EmployeeDTO(name, department);
 
-		assertThat(employee.name()      , is(name));
-		assertThat(employee.department(), is(department));
+		assertThat(employee.getName()      , is(name));
+		assertThat(employee.getDepartment(), is(department));
 	}
 }

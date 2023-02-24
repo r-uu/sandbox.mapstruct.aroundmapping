@@ -26,15 +26,15 @@ public abstract class MapStructMapper
 	abstract EmployeeEntity map(EmployeeDTO    employee, CycleTracking context);
 	abstract EmployeeDTO    map(EmployeeEntity employee, CycleTracking context);
 
-	@BeforeMapping protected void beforeMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
-	{
-		log.debug("dto: {} entity: {}", dto, entity);
-	}
-
-	@AfterMapping protected void afterMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
-	{
-		log.debug("dto: {} entity: {}", dto, entity);
-	}
+//	@BeforeMapping protected void beforeMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
+//	{
+//		log.debug("dto: {} entity: {}", dto, entity);
+//	}
+//
+//	@AfterMapping protected void afterMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
+//	{
+//		log.debug("dto: {} entity: {}", dto, entity);
+//	}
 
 	/** used to handle cyclic dependencies in mapstruct mappings */
 	@ToString public static class CycleTracking

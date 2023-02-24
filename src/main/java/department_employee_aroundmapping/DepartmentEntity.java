@@ -17,7 +17,7 @@ import java.util.Random;
 @Slf4j
 @RequiredArgsConstructor
 @NoArgsConstructor(access = PROTECTED) // generate no args constructor for jpa, mapstruct, ...
-//@Accessors(fluent = true)
+//@Accessors(fluent = true) // mapstruct does not seem to support fluent accessors
 @Getter()
 @ToString
 @EqualsAndHashCode

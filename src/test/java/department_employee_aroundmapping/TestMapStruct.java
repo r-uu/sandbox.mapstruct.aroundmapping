@@ -84,8 +84,8 @@ class TestMapStruct
 
 		DepartmentEntity departmentEntity = MapStructMapper.INSTANCE.map(department, new MapStructMapper.CycleTracking());
 
-		assertThat(departmentEntity       , is(not(nullValue())));
-		assertThat(departmentEntity.name(), is(name));
+		assertThat(departmentEntity          , is(not(nullValue())));
+		assertThat(departmentEntity.getName(), is(name));
 	}
 
 	@Test void mapValidDepartmentEntity()
@@ -108,9 +108,9 @@ class TestMapStruct
 
 		EmployeeEntity employeeEntity = MapStructMapper.INSTANCE.map(employee, new MapStructMapper.CycleTracking());
 
-		assertThat(employeeEntity                    , is(not(nullValue())));
-		assertThat(employeeEntity.name()             , is(name));
-		assertThat(employeeEntity.department().name(), is(name));
+		assertThat(employeeEntity                          , is(not(nullValue())));
+		assertThat(employeeEntity.getName()                , is(name));
+		assertThat(employeeEntity.getDepartment().getName(), is(name));
 	}
 
 	@Test void mapValidEmployeeEntity()
@@ -121,9 +121,9 @@ class TestMapStruct
 
 		EmployeeDTO employeeDTO = MapStructMapper.INSTANCE.map(employee, new CycleTracking());
 
-		assertThat(employeeDTO                    , is(not(nullValue())));
-		assertThat(employeeDTO.name()             , is(name));
-		assertThat(employeeDTO.department().name(), is(name));
+		assertThat(employeeDTO                , is(not(nullValue())));
+		assertThat(employeeDTO.getName()      , is(name));
+		assertThat(employeeDTO.getDepartment(), is(department));
 	}
 
 //	@Test void mapValidDepartmentDTOWithEmployees()
