@@ -1,6 +1,7 @@
 package department_employee_aroundmapping;
 
 import static department_employee_aroundmapping.MapStructMapper.*;
+import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
 import lombok.EqualsAndHashCode;
@@ -47,9 +48,9 @@ public class EmployeeEntity
 
 	void beforeMapping(@NonNull EmployeeDTO employee)
 	{
-		log.debug("entity {}, employee {}", this, employee);
+		log.debug("entity {}, dto {}", this, employee);
 		// set fields that can not be modified from outside
-		setId(employee.getId());
+		if (!isNull(employee.getId())) setId(employee.getId());
 	}
 
 	void afterMapping(@NonNull EmployeeDTO employee)

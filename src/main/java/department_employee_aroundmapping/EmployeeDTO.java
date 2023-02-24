@@ -1,5 +1,6 @@
 package department_employee_aroundmapping;
 
+import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
 import department_employee_aroundmapping.MapStructMapper.CycleTracking;
@@ -46,11 +47,11 @@ public class EmployeeDTO
 		log.debug("{}, context {}", this, context);
 	}
 
-	void beforeMapping(@NonNull EmployeeEntity entity)
+	void beforeMapping(@NonNull EmployeeEntity employee)
 	{
-		log.debug("dto {}, entity {}", this, entity);
+		log.debug("dto {}, entity {}", this, employee);
 		// set fields that can not be modified from outside
-		setId(entity.getId());
+		if (!isNull(employee.getId())) setId(employee.getId());
 	}
 
 	void afterMapping(@NonNull EmployeeEntity entity)
