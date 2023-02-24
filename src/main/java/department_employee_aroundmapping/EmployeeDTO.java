@@ -31,7 +31,7 @@ public class EmployeeDTO
 
 	/** let this be used by mapstruct, manually map each immutable (no setter) field */
 	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
-	public EmployeeDTO(@NonNull EmployeeEntity employee, @NonNull MapStructMapper.MapStructCycleTrackingContext context)
+	public EmployeeDTO(@NonNull EmployeeEntity employee, @NonNull MapStructMapper.CycleTracking context)
 	{
 		this(employee.name(), MapStructMapper.INSTANCE.map(employee.department(), context));
 		log.debug("context {}", context);

@@ -30,7 +30,7 @@ public class EmployeeEntity
 
 	/** let this be used by mapstruct, manually map each immutable (no setter) field */
 	@MapStructMapper.Default
-	public EmployeeEntity(@NonNull EmployeeDTO employee, @NonNull MapStructMapper.MapStructCycleTrackingContext context)
+	public EmployeeEntity(@NonNull EmployeeDTO employee, @NonNull MapStructMapper.CycleTracking context)
 	{
 		this(employee.name(), new DepartmentEntity(employee.department(), context));
 		log.debug("context {}", context);
