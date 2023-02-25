@@ -21,13 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @NoArgsConstructor(access = PROTECTED) // generate no args constructor for jsonb, jaxb, mapstruct, ...
-//@Accessors(fluent = true) // mapstruct does not seem to support fluent accessors
+//@Accessors(fluent = true) // mapstruct does not seem to properly support fluent accessors
 @Getter
 @ToString
 @EqualsAndHashCode
 public class DepartmentDTO
 {
-	/** can not be modified from outside, not final because otherwise there has to be a constructor with setId-parameter */
+	/**
+	 * may not be modified from outside
+	 * <p>not {@code final} or {@code @NonNull} because otherwise there has to be a constructor with {@code id}-parameter
+	 */
 	private Long id;
 
 	/** mutable non-null */
@@ -36,26 +39,10 @@ public class DepartmentDTO
 	/** mutable */
 	@Setter private String description;
 
-	@Getter(AccessLevel.NONE)
-//	@EqualsAndHashCode.Exclude // avoid stack overflow
-//	@ToString.Exclude          // avoid stack overflow
-	private Set<EmployeeDTO> employees;
+	/** no direct access to modifiable set */
+	@Getter(AccessLevel.NONE) private Set<EmployeeDTO> employees;
 
-	/**
-	 * let this be used by mapstruct (@Default, @ObjectFactory) and make sure to manually call required args constructor
-	 * @param department incoming entity to be used for construction of instance
-	 * @param context incoming context to properly handling cyclic dependencies
-	 */
-//	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
-//	public DepartmentDTO(@NonNull DepartmentEntity department, @NonNull CycleTracking context)
-//	{
-//		// call required args constructor
-//		this(department.getName());
-//		setId(department.getId());
-//		log.debug("{}, context {}", this, context);
-//	}
-
-	/** return unmodifiable */
+	/** return optional unmodifiable */
 	public Optional<Set<EmployeeDTO>> getOptionalEmployees()
 	{
 		if (isNull(employees)) return Optional.empty();
@@ -99,45 +86,34 @@ public class DepartmentDTO
 		return employees.contains(employee);
 	}
 
-	void beforeMapping(@NonNull DepartmentEntity department, MapStructMapper mapper)
+	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)} ) */
+	void beforeMapping(@NonNull DepartmentEntity source, CycleTracking context)
 	{
-		log.debug("dto {}, entity {}", this, department);
-
 		// set fields that can not be modified from outside
-		if (isNull(department.getId()) == false) setId(department.getId());
+		if (isNull(source.getId()) == false) setId(source.getId());
 
-		if (department.getOptionalEmployees().isPresent())
+		if (source.getOptionalEmployees().isPresent())
 		{
-			department
-					.getOptionalEmployees()
-					.get()
-					.forEach(e -> map(e, mapper));
+			source.getOptionalEmployees().get().forEach(e -> map(e, context));
 		}
 	}
 
-	void afterMapping(@NonNull DepartmentEntity department, CycleTracking context)
+	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)} ) */
+	void afterMapping(@NonNull DepartmentEntity source, CycleTracking context) { }
+
+	private void map(EmployeeEntity source, CycleTracking context)
 	{
-		log.debug("dto {}, entity {}", this, department);
+		EmployeeDTO target = context.getMappedInstance(source, EmployeeDTO.class);
+
+		if (target == null)
+		{
+			target = MapStructMapper.INSTANCE.map(source, context);
+			context.storeMappedInstance(source, target);
+
+			if (add(target)) log.debug("added {}"         , target);
+			else             log.error("failure adding {}", target);
+		}
 	}
 
 	private void setId(@NonNull Long id) { this.id = id; }
-
-	private void map(EmployeeEntity employee, MapStructMapper mapper)
-	{
-		DepartmentDTO mappedInstance = context.getMappedInstance(employee, DepartmentDTO.class);
-
-		if (mappedInstance == null)
-		{
-			EmployeeDTO employeeDTO = MapStructMapper.INSTANCE.map(employee);
-			context.storeMappedInstance(employee, employeeDTO);
-			if (add(employeeDTO))
-			{
-				log.debug("added {}", employeeDTO);
-			}
-			else
-			{
-				log.error("failure adding {}", employeeDTO);
-			}
-		}
-	}
 }

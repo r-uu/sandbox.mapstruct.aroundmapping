@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import department_employee_aroundmapping.MapStructMapper.CycleTracking;
 import org.junit.jupiter.api.Test;
 
 class TestMapStruct
@@ -14,28 +15,28 @@ class TestMapStruct
 	{
 		DepartmentDTO department = new DepartmentDTO();
 
-		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(department/*, new CycleTracking()*/));
+		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(department, new CycleTracking()));
 	}
 
 	@Test void mapEmptyDepartmentEntity()
 	{
 		DepartmentEntity department = new DepartmentEntity();
 
-		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(department/*, new CycleTracking()*/));
+		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(department, new CycleTracking()));
 	}
 
 	@Test void mapEmptyEmployeeDTO()
 	{
 		EmployeeDTO employee = new EmployeeDTO();
 
-		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(employee/*, new MapStructMapper.CycleTracking()*/));
+		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(employee, new CycleTracking()));
 	}
 
 	@Test void mapEmptyEmployeeEntity()
 	{
 		EmployeeEntity employee = new EmployeeEntity();
 
-		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(employee/*, new MapStructMapper.CycleTracking()*/));
+		assertThrows(NullPointerException.class, () -> MapStructMapper.INSTANCE.map(employee, new CycleTracking()));
 	}
 
 	@Test void mapInvalidNamedDepartmentDTO()
@@ -44,7 +45,7 @@ class TestMapStruct
 
 		assertThrows(
 				NullPointerException.class,
-				() -> MapStructMapper.INSTANCE.map(new DepartmentDTO(name)/*, new CycleTracking()*/));
+				() -> MapStructMapper.INSTANCE.map(new DepartmentDTO(name), new CycleTracking()));
 	}
 
 	@Test void mapInvalidNamedEmployeeDTO()
@@ -53,7 +54,7 @@ class TestMapStruct
 
 		assertThrows(
 				NullPointerException.class,
-				() -> MapStructMapper.INSTANCE.map(new EmployeeDTO(name, new DepartmentDTO("name"))/*, new CycleTracking()*/));
+				() -> MapStructMapper.INSTANCE.map(new EmployeeDTO(name, new DepartmentDTO("name")), new CycleTracking()));
 	}
 
 	@Test void mapInvalidNamedDepartmentEntity()
@@ -62,7 +63,7 @@ class TestMapStruct
 
 		assertThrows(
 				NullPointerException.class,
-				() -> MapStructMapper.INSTANCE.map(new DepartmentEntity(name)/*, new CycleTracking()*/));
+				() -> MapStructMapper.INSTANCE.map(new DepartmentEntity(name), new CycleTracking()));
 	}
 
 	@Test void mapInvalidNamedEmployeeEntity()
@@ -72,7 +73,7 @@ class TestMapStruct
 
 		assertThrows(
 				NullPointerException.class,
-				() -> MapStructMapper.INSTANCE.map(new EmployeeEntity(name, department)/*, new CycleTracking()*/));
+				() -> MapStructMapper.INSTANCE.map(new EmployeeEntity(name, department), new CycleTracking()));
 	}
 
 	@Test void mapValidDepartmentDTO()
@@ -80,7 +81,7 @@ class TestMapStruct
 		String        name       = "name";
 		DepartmentDTO department = new DepartmentDTO(name);
 
-		DepartmentEntity departmentEntity = MapStructMapper.INSTANCE.map(department/*, new CycleTracking()*/);
+		DepartmentEntity departmentEntity = MapStructMapper.INSTANCE.map(department, new CycleTracking());
 
 		assertThat(departmentEntity          , is(not(nullValue())));
 		assertThat(departmentEntity.getName(), is(name));
@@ -91,7 +92,7 @@ class TestMapStruct
 		String           name       = "name";
 		DepartmentEntity department = new DepartmentEntity(name);
 
-		DepartmentDTO departmentDTO = MapStructMapper.INSTANCE.map(department/*, new CycleTracking()*/);
+		DepartmentDTO departmentDTO = MapStructMapper.INSTANCE.map(department, new CycleTracking());
 
 		assertThat(departmentDTO          , is(not(nullValue())));
 		assertThat(departmentDTO.getId()  , is(department.getId()));
@@ -104,7 +105,7 @@ class TestMapStruct
 		DepartmentDTO  department = new DepartmentDTO(name);
 		EmployeeDTO    employee   = new EmployeeDTO(name, department);
 
-		EmployeeEntity employeeEntity = MapStructMapper.INSTANCE.map(employee/*, new CycleTracking()*/);
+		EmployeeEntity employeeEntity = MapStructMapper.INSTANCE.map(employee, new CycleTracking());
 
 		assertThat(employeeEntity                          , is(not(nullValue())));
 		assertThat(employeeEntity.getName()                , is(name));
@@ -117,7 +118,7 @@ class TestMapStruct
 		DepartmentEntity  department = new DepartmentEntity(name);
 		EmployeeEntity    employee   = new EmployeeEntity(name, department);
 
-		EmployeeDTO employeeDTO = MapStructMapper.INSTANCE.map(employee/*, new CycleTracking()*/);
+		EmployeeDTO employeeDTO = MapStructMapper.INSTANCE.map(employee, new CycleTracking());
 
 		assertThat(employeeDTO                          , is(not(nullValue())));
 		assertThat(employeeDTO.getName()                , is(name));
@@ -135,11 +136,30 @@ class TestMapStruct
 			department.add(new EmployeeDTO("name." + i, department));
 		}
 
-		DepartmentEntity departmentEntity = MapStructMapper.INSTANCE.map(department/*, new CycleTracking()*/);
+		DepartmentEntity departmentEntity = MapStructMapper.INSTANCE.map(department, new CycleTracking());
 
 		assertThat(departmentEntity                                    , is(not(nullValue())));
 		assertThat(departmentEntity.getOptionalEmployees()             , is(not(nullValue())));
 		assertThat(departmentEntity.getOptionalEmployees().isPresent() , is(true));
 		assertThat(departmentEntity.getOptionalEmployees().get().size(), is(numberOfEmployees));
+	}
+
+	@Test void mapValidDepartmentEntityWithEmployees()
+	{
+		String           name              = "name";
+		DepartmentEntity department        = new DepartmentEntity(name);
+		int              numberOfEmployees = 3;
+
+		for (int i = 0; i < numberOfEmployees; i++)
+		{
+			department.add(new EmployeeEntity("name." + i, department));
+		}
+
+		DepartmentDTO departmentDTO = MapStructMapper.INSTANCE.map(department, new CycleTracking());
+
+		assertThat(departmentDTO                                    , is(not(nullValue())));
+		assertThat(departmentDTO.getOptionalEmployees()             , is(not(nullValue())));
+		assertThat(departmentDTO.getOptionalEmployees().isPresent() , is(true));
+		assertThat(departmentDTO.getOptionalEmployees().get().size(), is(numberOfEmployees));
 	}
 }

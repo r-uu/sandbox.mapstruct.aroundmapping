@@ -22,7 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode
 public class EmployeeEntity
 {
-	/** can not be modified from outside, not final because otherwise there has to be a constructor with setId-parameter */
+	/**
+	 * may not be modified from outside
+	 * <p>not {@code final} or {@code @NonNull} because otherwise there has to be a constructor with {@code id}-parameter
+	 */
 	private Long id;
 
 	/** mutable, but not nullable */
@@ -33,31 +36,13 @@ public class EmployeeEntity
 	@ToString.Exclude
 	@NonNull @Setter private DepartmentEntity department;
 
-	/**
-	 * let this be used by mapstruct (@Default, @ObjectFactory) and make sure to manually call required args constructor
-	 * @param employee incoming entity to be used for construction of instance
-	 * @param context incoming context to properly handling cyclic dependencies
-	 */
-//	@Default // necessary, seems to make sure mapstruct does not use no-args-constructor
-//	public EmployeeEntity(@NonNull EmployeeDTO employee, @NonNull CycleTracking context)
-//	{
-//		// call required args constructor
-//		this(employee.getName(), INSTANCE.map(employee.getDepartment(), context));
-//		setId(department.getId());
-//		log.debug("{}, context {}", this, context);
-//	}
-
 	void beforeMapping(@NonNull EmployeeDTO employee, CycleTracking context)
 	{
-		log.debug("entity {}, dto {}", this, employee);
 		// set fields that can not be modified from outside
 		if (!isNull(employee.getId())) setId(employee.getId());
 	}
 
-	void afterMapping(@NonNull EmployeeDTO employee, CycleTracking context)
-	{
-		log.debug("entity {}, dto {}", this, employee);
-	}
+	void afterMapping(@NonNull EmployeeDTO employee, CycleTracking context) { }
 
 	private void setId(@NonNull Long id) { this.id = id; }
 }

@@ -21,13 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @NoArgsConstructor(access = PROTECTED) // generate no args constructor for jpa, mapstruct, ...
-//@Accessors(fluent = true) // mapstruct does not seem to support fluent accessors
+//@Accessors(fluent = true) // mapstruct does not seem to properly support fluent accessors
 @Getter()
 @ToString
 @EqualsAndHashCode
 public class DepartmentEntity
 {
-	/** can not be modified from outside, not final because otherwise there has to be a constructor with setId-parameter */
+	/**
+	 * may not be modified from outside
+	 * <p>not {@code final} or {@code @NonNull} because otherwise there has to be a constructor with {@code id}-parameter
+	 */
 	private Long id;
 
 	/** mutable non-null */
@@ -36,26 +39,10 @@ public class DepartmentEntity
 	/** mutable */
 	@Setter private String description;
 
-	@Getter(AccessLevel.NONE)
-//@EqualsAndHashCode.Exclude // avoid stack overflow
-//@ToString.Exclude          // avoid stack overflow
-	private Set<EmployeeEntity> employees;
+	/** no direct access to modifiable set */
+	@Getter(AccessLevel.NONE) private Set<EmployeeEntity> employees;
 
-	/**
-	 * let this be used by mapstruct (@Default, @ObjectFactory) and make sure to manually call required args constructor
-	 * <p>random value will be assigned to {@link #id}
-	 * @param department incoming DTO to be used for construction of instance
-	 * @param context incoming context to properly handling cyclic dependencies
-	 */
-//	@Default // necessary make sure mapstruct does not use no-args-constructor
-//	public DepartmentEntity(@NonNull DepartmentDTO department, @NonNull MapStructMapper.CycleTracking context)
-//	{
-//		this(department.getName());
-//		setId(new Random().nextLong());
-//		log.debug("{}, context {}", this, context);
-//	}
-
-	/** return unmodifiable */
+	/** return optional unmodifiable */
 	public Optional<Set<EmployeeEntity>> getOptionalEmployees()
 	{
 		if (isNull(employees)) return Optional.empty();
@@ -99,46 +86,34 @@ public class DepartmentEntity
 		return employees.contains(employee);
 	}
 
+	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)} ) */
 	void beforeMapping(@NonNull DepartmentDTO department, CycleTracking context)
 	{
-		log.debug("entity {}, dto {}", this, department);
-
 		// set fields that can not be modified from outside
 		if (!isNull(department.getId())) setId(department.getId());
 
 		if (department.getOptionalEmployees().isPresent())
 		{
-			department
-					.getOptionalEmployees()
-					.get()
-					.forEach(e -> map(context, e));
+			department.getOptionalEmployees().get().forEach(e -> map(e, context));
 		}
 	}
 
-	void afterMapping(@NonNull DepartmentDTO dto, CycleTracking context)
-	{
-		log.debug("entity {}, dto {}", this, dto);
-	}
+	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)} ) */
+	void afterMapping(@NonNull DepartmentDTO dto, CycleTracking context) { }
 
 	private void setId(@NonNull Long id) { this.id = id; }
 
-	private void map(CycleTracking context, EmployeeDTO e)
+	private void map(EmployeeDTO source, CycleTracking context)
 	{
-		DepartmentDTO mappedInstance = context.getMappedInstance(e, DepartmentDTO.class);
+		EmployeeEntity target = context.getMappedInstance(source, EmployeeEntity.class);
 
-		if (mappedInstance == null)
+		if (target == null)
 		{
-			EmployeeEntity employeeEntity = MapStructMapper.INSTANCE.map(e);
-			context.storeMappedInstance(e, employeeEntity);
+			target = MapStructMapper.INSTANCE.map(source, context);
+			context.storeMappedInstance(source, target);
 
-			if (add(employeeEntity))
-			{
-				log.debug("added {}", employeeEntity);
-			}
-			else
-			{
-				log.error("failure adding {}", employeeEntity);
-			}
+			if (add(target)) log.debug("added {}", target);
+			else             log.error("failure adding {}", target);
 		}
 	}
 }
