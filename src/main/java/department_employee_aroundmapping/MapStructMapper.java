@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeforeMapping;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.TargetType;
@@ -29,37 +28,39 @@ public abstract class MapStructMapper
 {
 	public static MapStructMapper INSTANCE = Mappers.getMapper(MapStructMapper.class);
 
-	abstract DepartmentEntity map(DepartmentDTO    department, @Context CycleTracking context);
-	abstract DepartmentDTO    map(DepartmentEntity department, @Context CycleTracking context);
+	protected CycleTracking context = new CycleTracking();
 
-	abstract EmployeeEntity map(EmployeeDTO    employee, @Context CycleTracking context);
-	abstract EmployeeDTO    map(EmployeeEntity employee, @Context CycleTracking context);
+	abstract DepartmentEntity map(DepartmentDTO    department/*, @Context CycleTracking context*/);
+	abstract DepartmentDTO    map(DepartmentEntity department/*, @Context CycleTracking context*/);
+
+	abstract EmployeeEntity map(EmployeeDTO    employee/*, @Context CycleTracking context*/);
+	abstract EmployeeDTO    map(EmployeeEntity employee/*, @Context CycleTracking context*/);
 
 	@BeforeMapping protected void beforeMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
 	{
 		log.debug("on enter - dto: {} entity: {}", dto, entity);
-		dto.beforeMapping(entity);
+		entity.beforeMapping(dto, null);
 		log.debug("on leave - dto: {} entity: {}", dto, entity);
 	}
 
 	@AfterMapping protected void afterMapping(DepartmentDTO dto, @MappingTarget DepartmentEntity entity)
 	{
 		log.debug("on enter - dto: {} entity: {}", dto, entity);
-		dto.afterMapping(entity);
+		entity.afterMapping(dto, this);
 		log.debug("on leave - dto: {} entity: {}", dto, entity);
 	}
 
 	@BeforeMapping protected void beforeMapping(DepartmentEntity entity, @MappingTarget DepartmentDTO dto)
 	{
 		log.debug("on enter - dto: {} entity: {}", dto, entity);
-		entity.beforeMapping(dto);
+		dto.beforeMapping(entity, null);
 		log.debug("on leave - dto: {} entity: {}", dto, entity);
 	}
 
 	@AfterMapping protected void afterMapping(DepartmentEntity entity, @MappingTarget DepartmentDTO dto)
 	{
 		log.debug("on enter - dto: {} entity: {}", dto, entity);
-		entity.afterMapping(dto);
+		dto.afterMapping(entity, this);
 		log.debug("on leave - dto: {} entity: {}", dto, entity);
 	}
 
@@ -68,6 +69,7 @@ public abstract class MapStructMapper
 	{
 		private Map<Object, Object> knownInstances = new IdentityHashMap<Object, Object>();
 
+		@SuppressWarnings("unchecked")
 		@BeforeMapping
 		public <T> T getMappedInstance(Object source, @TargetType Class<T> targetType)
 		{

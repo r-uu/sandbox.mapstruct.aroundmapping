@@ -4,8 +4,11 @@ import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
+import department_employee_aroundmapping.MapStructMapper.CycleTracking;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,8 +36,9 @@ public class DepartmentDTO
 	/** mutable */
 	@Setter private String description;
 
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
+	@Getter(AccessLevel.NONE)
+//	@EqualsAndHashCode.Exclude // avoid stack overflow
+//	@ToString.Exclude          // avoid stack overflow
 	private Set<EmployeeDTO> employees;
 
 	/**
@@ -51,12 +55,11 @@ public class DepartmentDTO
 //		log.debug("{}, context {}", this, context);
 //	}
 
-
 	/** return unmodifiable */
-	public Set<EmployeeDTO> getEmployees()
+	public Optional<Set<EmployeeDTO>> getOptionalEmployees()
 	{
-		if (isNull(employees)) return null;
-		return Set.copyOf(employees);
+		if (isNull(employees)) return Optional.empty();
+		return Optional.of(Set.copyOf(employees));
 	}
 
 	public boolean add(@NonNull EmployeeDTO employee)
@@ -96,17 +99,45 @@ public class DepartmentDTO
 		return employees.contains(employee);
 	}
 
-	void beforeMapping(@NonNull DepartmentEntity department)
+	void beforeMapping(@NonNull DepartmentEntity department, MapStructMapper mapper)
 	{
 		log.debug("dto {}, entity {}", this, department);
+
 		// set fields that can not be modified from outside
-		if (!isNull(department.getId())) setId(department.getId());
+		if (isNull(department.getId()) == false) setId(department.getId());
+
+		if (department.getOptionalEmployees().isPresent())
+		{
+			department
+					.getOptionalEmployees()
+					.get()
+					.forEach(e -> map(e, mapper));
+		}
 	}
 
-	void afterMapping(@NonNull DepartmentEntity department)
+	void afterMapping(@NonNull DepartmentEntity department, CycleTracking context)
 	{
 		log.debug("dto {}, entity {}", this, department);
 	}
 
 	private void setId(@NonNull Long id) { this.id = id; }
+
+	private void map(EmployeeEntity employee, MapStructMapper mapper)
+	{
+		DepartmentDTO mappedInstance = context.getMappedInstance(employee, DepartmentDTO.class);
+
+		if (mappedInstance == null)
+		{
+			EmployeeDTO employeeDTO = MapStructMapper.INSTANCE.map(employee);
+			context.storeMappedInstance(employee, employeeDTO);
+			if (add(employeeDTO))
+			{
+				log.debug("added {}", employeeDTO);
+			}
+			else
+			{
+				log.error("failure adding {}", employeeDTO);
+			}
+		}
+	}
 }

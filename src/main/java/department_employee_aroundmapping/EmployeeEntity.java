@@ -3,6 +3,7 @@ package department_employee_aroundmapping;
 import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
+import department_employee_aroundmapping.MapStructMapper.CycleTracking;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,14 +47,14 @@ public class EmployeeEntity
 //		log.debug("{}, context {}", this, context);
 //	}
 
-	void beforeMapping(@NonNull EmployeeDTO employee)
+	void beforeMapping(@NonNull EmployeeDTO employee, CycleTracking context)
 	{
 		log.debug("entity {}, dto {}", this, employee);
 		// set fields that can not be modified from outside
 		if (!isNull(employee.getId())) setId(employee.getId());
 	}
 
-	void afterMapping(@NonNull EmployeeDTO employee)
+	void afterMapping(@NonNull EmployeeDTO employee, CycleTracking context)
 	{
 		log.debug("entity {}, dto {}", this, employee);
 	}

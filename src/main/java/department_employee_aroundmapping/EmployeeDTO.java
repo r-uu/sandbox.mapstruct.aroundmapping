@@ -3,6 +3,7 @@ package department_employee_aroundmapping;
 import static java.util.Objects.isNull;
 import static lombok.AccessLevel.PROTECTED;
 
+import department_employee_aroundmapping.MapStructMapper.CycleTracking;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,14 +47,14 @@ public class EmployeeDTO
 	 * @param employee incoming entity to be used for construction of instance
 	 * @param context incoming context to properly handling cyclic dependencies
 	 */
-	void beforeMapping(@NonNull EmployeeEntity employee)
+	void beforeMapping(@NonNull EmployeeEntity employee, CycleTracking context)
 	{
 		log.debug("dto {}, entity {}", this, employee);
 		// set fields that can not be modified from outside
 		if (!isNull(employee.getId())) setId(employee.getId());
 	}
 
-	void afterMapping(@NonNull EmployeeEntity entity)
+	void afterMapping(@NonNull EmployeeEntity entity, CycleTracking context)
 	{
 		log.debug("dto {}, entity {}", this, entity);
 	}
