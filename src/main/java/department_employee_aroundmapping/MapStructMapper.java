@@ -20,16 +20,10 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Mapper
-//(
-//		collectionMappingStrategy = ADDER_PREFERRED,
-//    nullValueCheckStrategy = ALWAYS
-//)
 @Slf4j
 public abstract class MapStructMapper
 {
-	public static MapStructMapper INSTANCE = Mappers.getMapper(MapStructMapper.class);
-
-	protected CycleTracking context = new CycleTracking();
+	public static final MapStructMapper INSTANCE = Mappers.getMapper(MapStructMapper.class);
 
 	abstract DepartmentEntity map(DepartmentDTO    department, @Context CycleTracking context);
 	abstract DepartmentDTO    map(DepartmentEntity department, @Context CycleTracking context);
@@ -64,7 +58,7 @@ public abstract class MapStructMapper
 	/** used to handle cyclic dependencies in mapstruct mappings */
 	@ToString public static class CycleTracking
 	{
-		private Map<Object, Object> knownInstances = new IdentityHashMap<Object, Object>();
+		private final Map<Object, Object> knownInstances = new IdentityHashMap<>();
 
 		@BeforeMapping
 		public <T> T getMappedInstance(Object source, @TargetType Class<T> targetType)

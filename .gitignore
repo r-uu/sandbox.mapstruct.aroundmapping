@@ -22,10 +22,6 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-/config/wsl/bash/.bash_aliases_backup
-/app/taggable/server/openliberty/export/.env
-/app/taggable/server/openliberty/export/database-env/database.env
-
 # Eclipse
 .classpath/
 .classpath
