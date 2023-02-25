@@ -86,7 +86,7 @@ public class DepartmentDTO
 		return employees.contains(employee);
 	}
 
-	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)} ) */
+	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)}) */
 	void beforeMapping(@NonNull DepartmentEntity source, CycleTracking context)
 	{
 		// set fields that can not be modified from outside
@@ -98,7 +98,7 @@ public class DepartmentDTO
 		}
 	}
 
-	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)} ) */
+	/** mapstruct callback (see {@link MapStructMapper#beforeMapping(DepartmentDTO, DepartmentEntity, CycleTracking)}) */
 	void afterMapping(@NonNull DepartmentEntity source, CycleTracking context) { }
 
 	private void map(EmployeeEntity source, CycleTracking context)
